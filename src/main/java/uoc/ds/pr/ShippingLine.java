@@ -23,8 +23,8 @@ public interface ShippingLine {
         CABIN4
     }
 
-    public void addShip(String id, String name, int nArmChairs, int nCabins2, int nCabins4, int nParkingLots, int
-            unLoadTimeinMinutes);
+    public void addShip(String id, String name, int nArmChairs, int nCabins2, int nCabins4, int nParkingSlots, int
+            unLoadTimeInMinutes);
     public void addRoute(String id, String beginningPort, String arrivalPort);
 
     public void addClient(String id, String name, String surname);
