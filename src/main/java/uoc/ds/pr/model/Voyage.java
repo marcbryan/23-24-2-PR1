@@ -1,5 +1,7 @@
 package uoc.ds.pr.model;
 
+import uoc.ds.pr.util.DSLinkedList;
+
 import java.util.Date;
 
 public class Voyage {
@@ -10,6 +12,7 @@ public class Voyage {
     private String idRoute;
     private Ship ship;
     private Route route;
+    private DSLinkedList<Reservation> reservations;
 
     public Voyage(String id, Date departureDt, Date arrivalDt, String idShip, String idRoute) {
         this.id = id;
@@ -17,6 +20,7 @@ public class Voyage {
         this.arrivalDt = arrivalDt;
         this.idShip = idShip;
         this.idRoute = idRoute;
+        reservations = new DSLinkedList<>();
     }
 
     public String getId() {
