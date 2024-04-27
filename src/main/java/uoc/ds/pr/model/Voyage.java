@@ -1,6 +1,8 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import uoc.ds.pr.util.DSLinkedList;
+import uoc.ds.pr.util.FiniteLinkedList;
 
 import java.util.Date;
 
@@ -8,19 +10,28 @@ public class Voyage {
     private String id;
     private Date departureDt;
     private Date arrivalDt;
-    private String idShip;
-    private String idRoute;
     private Ship ship;
     private Route route;
     private DSLinkedList<Reservation> reservations;
+    private FiniteLinkedList<Reservation> armChairsReservations;
+    private FiniteLinkedList<Reservation> cabin2Reservations;
+    private FiniteLinkedList<Reservation> cabin4Reservations;
+    private StackArrayImpl<Reservation> vehicleReservations;
 
-    public Voyage(String id, Date departureDt, Date arrivalDt, String idShip, String idRoute) {
+    public Voyage(String id, Date departureDt, Date arrivalDt, Ship ship, Route route) {
         this.id = id;
         this.departureDt = departureDt;
         this.arrivalDt = arrivalDt;
-        this.idShip = idShip;
-        this.idRoute = idRoute;
+        this.ship = ship;
+        this.route = route;
+
+        // Inicializamos
         reservations = new DSLinkedList<>();
+        // con la capacidad máxima
+        armChairsReservations = new FiniteLinkedList<>(ship.getnArmChairs());
+        cabin2Reservations = new FiniteLinkedList<>(ship.getnCabins2());
+        cabin4Reservations = new FiniteLinkedList<>(ship.getnCabins4());
+        vehicleReservations = new StackArrayImpl<>(ship.getnParkingSlots());
     }
 
     public String getId() {
@@ -47,55 +58,43 @@ public class Voyage {
         this.arrivalDt = arrivalDt;
     }
 
-    public String getIdShip() {
-        return idShip;
-    }
-
-    public void setIdShip(String idShip) {
-        this.idShip = idShip;
-    }
-
-    public String getIdRoute() {
-        return idRoute;
-    }
-
-    public void setIdRoute(String idRoute) {
-        this.idRoute = idRoute;
-    }
-
     public Ship getShip() {
         return ship;
-    }
-
-    public void setShip(Ship ship) {
-        this.ship = ship;
     }
 
     public Route getRoute() {
         return route;
     }
 
-    public void setRoute(Route route) {
-        this.route = route;
+    public DSLinkedList<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public FiniteLinkedList<Reservation> getArmChairsReservations() {
+        return armChairsReservations;
+    }
+
+    public FiniteLinkedList<Reservation> getCabin2Reservations() {
+        return cabin2Reservations;
+    }
+
+    public FiniteLinkedList<Reservation> getCabin4Reservations() {
+        return cabin4Reservations;
     }
 
     public int getAvailableArmChairs() {
-        // TODO: Modificar
-        return ship.getnArmChairs();
+        return armChairsReservations.size();
     }
 
     public int getAvailableCabin2() {
-        // TODO: Modificar
-        return ship.getnCabins2();
+        return cabin2Reservations.size();
     }
 
     public int getAvailableCabin4() {
-        // TODO: Modificar
-        return ship.getnCabins4();
+        return cabin4Reservations.size();
     }
 
     public int getAvailableParkingSlots() {
-        // TODO: Modificar
-        return ship.getnParkingSlots();
+        return vehicleReservations.size();
     }
 }

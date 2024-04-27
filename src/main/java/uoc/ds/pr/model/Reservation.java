@@ -2,41 +2,29 @@ package uoc.ds.pr.model;
 
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.ShippingLine.AccommodationType;
+import uoc.ds.pr.util.DSLinkedList;
 
 public class Reservation {
-    private String[] clients;
-    private String idVoyage;
+    private DSLinkedList<Client> clients;
+    private Voyage voyage;
     private AccommodationType accommodationType;
     private String idVehicle;
     private double price;
 
-    public Reservation(String[] clients, String idVoyage, AccommodationType accommodationType, String idVehicle, double price) {
+    public Reservation(DSLinkedList<Client> clients, Voyage voyage, AccommodationType accommodationType, String idVehicle, double price) {
         this.clients = clients;
-        this.idVoyage = idVoyage;
+        this.voyage = voyage;
         this.accommodationType = accommodationType;
         this.idVehicle = idVehicle;
         this.price = price;
     }
 
     public Iterator<Client> clients() {
-        // TODO: Implementar
-        return null;
+        return clients.values();
     }
 
-    public String[] getClients() {
-        return clients;
-    }
-
-    public void setClients(String[] clients) {
-        this.clients = clients;
-    }
-
-    public String getIdVoyage() {
-        return idVoyage;
-    }
-
-    public void setIdVoyage(String idVoyage) {
-        this.idVoyage = idVoyage;
+    public Voyage getVoyage() {
+        return voyage;
     }
 
     public AccommodationType getAccommodationType() {

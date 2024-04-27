@@ -47,19 +47,64 @@ public class ShippingLineImpl implements ShippingLine {
 
     @Override
     public void addVoyage(String id, Date departureDt, Date arrivalDt, String idShip, String idRoute) throws ShipNotFoundException, RouteNotFoundException, ParkingFullException, NoAcommodationAvailableException {
-        Voyage voyage = new Voyage(id, departureDt, arrivalDt, idShip, idRoute);
+        // Buscamos el buque y la ruta
+        Ship ship = getShip(idShip);
+        Route route = getRoute(idRoute);
+
+        Voyage voyage = new Voyage(id, departureDt, arrivalDt, ship, route);
         voyages.insertEnd(voyage);
     }
 
     @Override
     public void reserve(String[] clients, String idVoyage, AccommodationType accommodationType, String idVehicle, double price) throws ClientNotFoundException, VoyageNotFoundException, ParkingFullException, NoAcommodationAvailableException, MaxExceededException, ReservationAlreadyExistsException {
-        Reservation reservation = new Reservation(clients, idVoyage, accommodationType, idVehicle, price);
+        // Creamos una lista encadenada de clientes
+        DSLinkedList<Client> clientsReservation = new DSLinkedList<>();
 
+        // Añadimos a la lista encadenada los objetos Client buscandolo por su id con getClient()
+        for (int i = 0; i < clients.length; i++) {
+            Client client = getClient(clients[i]);
+            clientsReservation.insertEnd(client);
+        }
+
+        // Buscamos la travesía por su id
+        Voyage voyage = getVoyage(idVoyage);
+
+        Reservation reservation = new Reservation(clientsReservation, voyage, accommodationType, idVehicle, price);
+
+
+        // Añadimos la reserva en la LinkedList de la travesía
+        DSLinkedList<Reservation> voyageReservations = voyage.getReservations();
+        voyageReservations.insertEnd(reservation);
+
+        // Añadimos la reserva a la FiniteLinkedList que le toque
+        switch (accommodationType) {
+            case ARMCHAIR:
+                voyage.getArmChairsReservations().insertEnd(reservation);
+                break;
+
+            case CABIN2:
+                voyage.getCabin2Reservations().insertEnd(reservation);
+                break;
+
+            case CABIN4:
+                voyage.getCabin4Reservations().insertEnd(reservation);
+                break;
+        }
+
+        // Añadimos la reserva en la LinkedList del cliente (o clientes, si hay más de uno)
+        Iterator<Client> clientIterator = clientsReservation.values();
+        while (clientIterator.hasNext()) {
+            Client client = clientIterator.next();
+
+            DSLinkedList<Reservation> clientReservations = client.getReservations();
+            clientReservations.insertEnd(reservation);
+        }
     }
 
     @Override
     public void load(String idClient, String idVoyage, Date dt) throws LoadingAlreadyException, ClientNotFoundException, VoyageNotFoundException, ReservationNotFoundException {
-
+        Client client = getClient(idClient);
+        Voyage voyage = getVoyage(idVoyage);
     }
 
     @Override
@@ -74,12 +119,14 @@ public class ShippingLineImpl implements ShippingLine {
 
     @Override
     public Iterator<Reservation> getClientReservations(String idClient) throws NoReservationException {
-        return null;
+        Client client = getClient(idClient);
+        return client.getReservations().values();
     }
 
     @Override
     public Iterator<Reservation> getVoyageReservations(String idVoyage) throws NoReservationException {
-        return null;
+        Voyage voyage = getVoyage(idVoyage);
+        return voyage.getReservations().values();
     }
 
     @Override
@@ -99,41 +146,61 @@ public class ShippingLineImpl implements ShippingLine {
 
     @Override
     public Ship getShip(String id) {
-        return null;
+        return ships.get(id);
     }
 
     @Override
     public Route getRoute(String idRoute) {
-        return null;
+        return routes.get(idRoute);
     }
 
     @Override
     public Client getClient(String id) {
+        Iterator<Client> iterator = clients.values();
+
+        while (iterator.hasNext()) {
+            Client client = iterator.next();
+
+            // Si encontramos el id en el cliente, lo devolvemos
+            if (client.getId().equals(id))
+                return client;
+        }
+
         return null;
     }
 
     @Override
     public Voyage getVoyage(String id) {
+        Iterator<Voyage> iterator = voyages.values();
+
+        while (iterator.hasNext()) {
+            Voyage voyage = iterator.next();
+
+            // Si encontramos el id en la travesía, lo devolvemos
+            if (voyage.getId().equals(id))
+                return voyage;
+        }
+
         return null;
     }
 
     @Override
     public int numShips() {
-        return 0;
+        return ships.size();
     }
 
     @Override
     public int numRoutes() {
-        return 0;
+        return routes.size();
     }
 
     @Override
     public int numClients() {
-        return 0;
+        return clients.size();
     }
 
     @Override
     public int numVoyages() {
-        return 0;
+        return voyages.size();
     }
 }

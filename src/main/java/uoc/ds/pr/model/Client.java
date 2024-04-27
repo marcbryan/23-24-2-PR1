@@ -1,14 +1,18 @@
 package uoc.ds.pr.model;
 
+import uoc.ds.pr.util.DSLinkedList;
+
 public class Client {
     private String id;
     private String name;
     private String surname;
+    private DSLinkedList<Reservation> reservations;
 
     public Client(String id, String name, String surname) {
         this.id = id;
         this.name = name;
         this.surname = surname;
+        reservations = new DSLinkedList<>();
     }
 
     public String getId() {
@@ -33,5 +37,9 @@ public class Client {
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public DSLinkedList<Reservation> getReservations() {
+        return reservations;
     }
 }
