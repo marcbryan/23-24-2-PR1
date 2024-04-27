@@ -1,5 +1,6 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.util.DSLinkedList;
 
 public class Client {
@@ -41,5 +42,9 @@ public class Client {
 
     public DSLinkedList<Reservation> getReservations() {
         return reservations;
+    }
+
+    public Iterator<Reservation> reservations() {
+        return reservations.values();
     }
 }

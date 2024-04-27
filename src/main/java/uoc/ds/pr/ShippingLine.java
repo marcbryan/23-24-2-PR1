@@ -29,7 +29,7 @@ public interface ShippingLine {
 
     public void addClient(String id, String name, String surname);
 
-    public void addVoyage(String id, Date departureDt, Date arrivalDt, String idShip, String idRoute) throws ShipNotFoundException, RouteNotFoundException, ParkingFullException, NoAcommodationAvailableException;
+    public void addVoyage(String id, Date departureDt, Date arrivalDt, String idShip, String idRoute) throws ShipNotFoundException, RouteNotFoundException;
 
     public void reserve(String[] clients, String idVoyage, AccommodationType accommodationType, String idVehicle, double price)
             throws ClientNotFoundException, VoyageNotFoundException, ParkingFullException,

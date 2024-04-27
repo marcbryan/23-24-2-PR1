@@ -10,6 +10,7 @@ public class Reservation {
     private AccommodationType accommodationType;
     private String idVehicle;
     private double price;
+    private boolean hasLoaded = false;
 
     public Reservation(DSLinkedList<Client> clients, Voyage voyage, AccommodationType accommodationType, String idVehicle, double price) {
         this.clients = clients;
@@ -49,5 +50,21 @@ public class Reservation {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public boolean hasLoaded() {
+        return hasLoaded;
+    }
+
+    public void setHasLoaded(boolean hasLoaded) {
+        this.hasLoaded = hasLoaded;
+    }
+
+    public int numClients() {
+        return clients.size();
+    }
+
+    public boolean hasParkingLot() {
+        return (idVehicle != null);
     }
 }

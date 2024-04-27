@@ -36,6 +36,12 @@ Para la clase OrderedVector he mirado el test OrderedVectorTest y he implementad
 He utilizado OrderedVector para...
 
 Para la clase FiniteLinkedList he mirado el test FiniteLinkedListTest y he extendido de la clase LinkedList y he implementado solo el método isFull() de la interfaz FiniteContainer, ya que el resto de métodos ya están en la superclase.
+He utilizado FiniteLinkedList para guardar las reservas de: butacas de una travesía, camarotes dobles de una travesía y camarotes cuádruples de una travesía.
+
+**Excepciones**
+
+He creado las excepciones ... en la carpeta **src/main/java/uoc/ds/pr/exceptions**.
+Todas las excepciones extienden de DSException.
 
 **ShippingLineImpl**
 

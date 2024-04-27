@@ -82,6 +82,10 @@ public class Voyage {
         return cabin4Reservations;
     }
 
+    public StackArrayImpl<Reservation> getVehicleReservations() {
+        return vehicleReservations;
+    }
+
     public int getAvailableArmChairs() {
         return armChairsReservations.size();
     }
@@ -95,6 +99,10 @@ public class Voyage {
     }
 
     public int getAvailableParkingSlots() {
+        return vehicleReservations.size();
+    }
+
+    public int numParkingLots() {
         return vehicleReservations.size();
     }
 }
