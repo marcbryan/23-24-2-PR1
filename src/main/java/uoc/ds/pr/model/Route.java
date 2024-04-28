@@ -43,6 +43,11 @@ public class Route {
         voyages.insertEnd(voyage);
     }
 
+    public void deleteVoyage(Voyage voyage) {
+        // Borra la travesía de la lista encadenada
+        voyages.delete(voyages.getElementPosition(voyage));
+    }
+
     public int numVoyages() {
         return voyages.size();
     }

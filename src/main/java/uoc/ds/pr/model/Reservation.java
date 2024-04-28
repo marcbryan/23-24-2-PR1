@@ -24,6 +24,10 @@ public class Reservation {
         return clients.values();
     }
 
+    public DSLinkedList<Client> getClients() {
+        return clients;
+    }
+
     public Voyage getVoyage() {
         return voyage;
     }

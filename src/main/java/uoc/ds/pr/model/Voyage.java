@@ -1,6 +1,7 @@
 package uoc.ds.pr.model;
 
 import edu.uoc.ds.adt.sequential.StackArrayImpl;
+import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.util.DSLinkedList;
 import uoc.ds.pr.util.FiniteLinkedList;
 
@@ -17,6 +18,7 @@ public class Voyage {
     private FiniteLinkedList<Reservation> cabin2Reservations;
     private FiniteLinkedList<Reservation> cabin4Reservations;
     private StackArrayImpl<Reservation> vehicleReservations;
+    private StackArrayImpl<Reservation> parkingLots;
 
     public Voyage(String id, Date departureDt, Date arrivalDt, Ship ship, Route route) {
         this.id = id;
@@ -32,6 +34,7 @@ public class Voyage {
         cabin2Reservations = new FiniteLinkedList<>(ship.getnCabins2());
         cabin4Reservations = new FiniteLinkedList<>(ship.getnCabins4());
         vehicleReservations = new StackArrayImpl<>(ship.getnParkingSlots());
+        parkingLots = new StackArrayImpl<>(ship.getnParkingSlots());
     }
 
     public String getId() {
@@ -62,8 +65,16 @@ public class Voyage {
         return ship;
     }
 
+    public void setShip(Ship ship) {
+        this.ship = ship;
+    }
+
     public Route getRoute() {
         return route;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
     }
 
     public DSLinkedList<Reservation> getReservations() {
@@ -86,23 +97,38 @@ public class Voyage {
         return vehicleReservations;
     }
 
+    public StackArrayImpl<Reservation> getParkingLots() {
+        return parkingLots;
+    }
+
     public int getAvailableArmChairs() {
-        return armChairsReservations.size();
+        return armChairsReservations.length() - armChairsReservations.size();
     }
 
     public int getAvailableCabin2() {
-        return cabin2Reservations.size();
+        return cabin2Reservations.length() - cabin2Reservations.size();
     }
 
     public int getAvailableCabin4() {
-        return cabin4Reservations.size();
+        return cabin4Reservations.length() - cabin4Reservations.size();
     }
 
     public int getAvailableParkingSlots() {
-        return vehicleReservations.size();
+        return ship.getnParkingSlots() - vehicleReservations.size();
     }
 
     public int numParkingLots() {
-        return vehicleReservations.size();
+        return parkingLots.size();
+    }
+
+    public boolean alreadyParked(String idVehicle) {
+        Iterator<Reservation> iterator = parkingLots.values();
+        while (iterator.hasNext()) {
+            Reservation reservation = iterator.next();
+            if (reservation.getIdVehicle().equals(idVehicle))
+                return true;
+        }
+
+        return false;
     }
 }

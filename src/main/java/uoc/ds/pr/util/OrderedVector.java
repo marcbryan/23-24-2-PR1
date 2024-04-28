@@ -73,15 +73,15 @@ public class OrderedVector<E> implements FiniteContainer<E> {
         boolean end = false;
         E v = null;
 
-        // Si existe el elemento lo borramos para volverlo a insertar en su posición
-        this.delete(vIn);
-
         if (isFull()) {
             E pOut = last();
-            if (comparator.compare(pOut, vIn)>0) {
-                this.delete(pOut);
-                this.update(vIn);
+            if (comparator.compare(pOut, vIn) < 0) {
+                delete(pOut);
+                update(vIn);
+                return;
             }
+            else
+                return;
         }
 
         // Buscamos la posición donde insertarlo
@@ -106,7 +106,11 @@ public class OrderedVector<E> implements FiniteContainer<E> {
 
         // Si lo encontramos, desplazamos a la izquierda los elementos
         if (found) {
-            lshift(i-1);
+            if (i < length)
+                lshift(i-1);
+            else
+                lshift(i);
+
             length--;
         }
     }

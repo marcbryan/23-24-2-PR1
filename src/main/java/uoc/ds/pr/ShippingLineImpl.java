@@ -60,8 +60,19 @@ public class ShippingLineImpl implements ShippingLine {
 
     @Override
     public void addClient(String id, String name, String surname) {
-        Client client = new Client(id, name, surname);
-        clients.insertEnd(client);
+        Client client = getClient(id);
+
+        // Comprobamos si existe o no el cliente
+        if (client == null) {
+            client = new Client(id, name, surname);
+            clients.insertEnd(client);
+        }
+        else {
+            // Si ya existe, actualizamos los datos
+            client.setName(name);
+            client.setSurname(surname);
+        }
+
     }
 
     @Override
@@ -78,13 +89,35 @@ public class ShippingLineImpl implements ShippingLine {
         if (route == null)
             throw new RouteNotFoundException();
 
-        // Añadimos la travesía a la lista encadenda
-        Voyage voyage = new Voyage(id, departureDt, arrivalDt, ship, route);
-        voyages.insertEnd(voyage);
-        // También lo añadimos a la lista encadenada de travesías del trayecto
-        route.addVoyage(voyage);
-        // Actualizamos el vector ordenado de trayectos más realizados
-        mostTraveledRoute.update(route);
+        Voyage voyage = getVoyage(id);
+        // Comprobamos si existe o no la travesía
+        if (voyage == null) {
+            // Añadimos la travesía a la lista encadenda
+            voyage = new Voyage(id, departureDt, arrivalDt, ship, route);
+            voyages.insertEnd(voyage);
+            // También lo añadimos a la lista encadenada de travesías del trayecto
+            route.addVoyage(voyage);
+            // Actualizamos el vector ordenado de trayectos más realizados
+            mostTraveledRoute.update(route);
+        }
+        else {
+            // Si se actualiza el id del trayecto, lo borramos de la lista encadenada de travesías del trayecto
+            if (!voyage.getRoute().getId().equals(idRoute)) {
+                Route oldRoute = voyage.getRoute();
+                oldRoute.deleteVoyage(voyage);
+                // Actualizamos el vector ordenado de trayectos más realizados
+                mostTraveledRoute.update(oldRoute);
+
+                // Actualizamos la travesía
+                voyage.setDepartureDt(departureDt);
+                voyage.setArrivalDt(arrivalDt);
+                voyage.setRoute(route);
+                // Y lo añadimos en el nuevo trayecto
+                route.addVoyage(voyage);
+                // Actualizamos el vector ordenado de trayectos más realizados
+                mostTraveledRoute.update(route);
+            }
+        }
     }
 
     @Override
@@ -121,17 +154,40 @@ public class ShippingLineImpl implements ShippingLine {
 
         Reservation reservation = new Reservation(clientsReservation, voyage, accommodationType, idVehicle, price);
 
+        // Comprobamos si la reserva tiene vehículo
+        if (idVehicle != null) {
+            StackArrayImpl<Reservation> reservationStackArray = voyage.getVehicleReservations();
+            // Si el parking está lleno, lanzamos la excepción
+            if (reservationStackArray.isFull())
+                throw new ParkingFullException();
+
+            // Añadimos la reserva al StackArray de reservas de vehículos
+            reservationStackArray.push(reservation);
+        }
+
         // Añadimos la reserva a la FiniteLinkedList que le toque
         switch (accommodationType) {
             case ARMCHAIR:
-                FiniteLinkedList<Reservation> armChairsReservations = voyage.getArmChairsReservations();
-                for (int i = 0; i < clientsReservation.size(); i++) {
-                    // Si no hay más butacas disponibles, lanzamos la excepción
-                    if (armChairsReservations.isFull())
-                        throw new NoAcommodationAvailableException();
+                // Si no hay espacio para los clientes, lanzamos la excepción
+                if (clients.length > voyage.getAvailableArmChairs())
+                    throw new NoAcommodationAvailableException();
 
-                    // Añadimos la reserva a la FiniteLinkedList de reservas de butacas
-                    voyage.getArmChairsReservations().insertEnd(reservation);
+                // Para cada cliente guardaremos una reserva diferente (butaca diferente)
+                Iterator<Client> iterator = clientsReservation.values();
+                while (iterator.hasNext()) {
+                    Client client = iterator.next();
+                    // En este caso, creamos una reserva con un único cliente
+                    DSLinkedList<Client> singleClientLinkedList = new DSLinkedList<>();
+                    singleClientLinkedList.insertEnd(client);
+                    Reservation singleClientReservation = new Reservation(singleClientLinkedList, voyage, accommodationType, idVehicle, price);
+                    // Guardardamos la reserva en la FiniteLinkedList de butacas
+                    voyage.getArmChairsReservations().insertEnd(singleClientReservation);
+                    // Guardamos la reserva en la lista encadenada de reservas del cliente
+                    DSLinkedList<Reservation> clientReservations = client.getReservations();
+                    clientReservations.insertEnd(singleClientReservation);
+                    // Guardamos la reserva en la lista encadenada de reservas de la travesía
+                    DSLinkedList<Reservation> voyageReservations = voyage.getReservations();
+                    voyageReservations.insertEnd(singleClientReservation);
                 }
                 break;
 
@@ -162,29 +218,20 @@ public class ShippingLineImpl implements ShippingLine {
                 break;
         }
 
-        // Comprobamos si la reserva tiene vehículo
-        if (idVehicle != null) {
-            StackArrayImpl<Reservation> reservationStackArray = voyage.getVehicleReservations();
-            // Si el parking está lleno, lanzamos la excepción
-            if (reservationStackArray.isFull())
-                throw new ParkingFullException();
+        if (accommodationType != AccommodationType.ARMCHAIR) {
+            // Añadimos la reserva en la LinkedList de reservas del cliente (o clientes, si hay más de uno)
+            Iterator<Client> clientIterator = clientsReservation.values();
+            while (clientIterator.hasNext()) {
+                Client client = clientIterator.next();
 
-            // Añadimos la reserva al StackArray de reservas de vehículos
-            reservationStackArray.push(reservation);
+                DSLinkedList<Reservation> clientReservations = client.getReservations();
+                clientReservations.insertEnd(reservation);
+            }
+
+            // Añadimos la reserva en la LinkedList de la travesía
+            DSLinkedList<Reservation> voyageReservations = voyage.getReservations();
+            voyageReservations.insertEnd(reservation);
         }
-
-        // Añadimos la reserva en la LinkedList de reservas del cliente (o clientes, si hay más de uno)
-        Iterator<Client> clientIterator = clientsReservation.values();
-        while (clientIterator.hasNext()) {
-            Client client = clientIterator.next();
-
-            DSLinkedList<Reservation> clientReservations = client.getReservations();
-            clientReservations.insertEnd(reservation);
-        }
-
-        // Añadimos la reserva en la LinkedList de la travesía
-        DSLinkedList<Reservation> voyageReservations = voyage.getReservations();
-        voyageReservations.insertEnd(reservation);
     }
 
     @Override
@@ -214,8 +261,23 @@ public class ShippingLineImpl implements ShippingLine {
                 // Comprobamos si ha embarcado o no
                 if (hasLoaded)
                     throw new LoadingAlreadyException();
-                else
+                else {
+                    // Marcamos que el cliente ha embarcado
                     reservation.setHasLoaded(true);
+
+                    // El cliente ha embarcado, por lo tanto, contamos que ha realizado el viaje
+                    mostTravelerClients.update(client);
+
+                    // Comprobamos si tiene vehículo
+                    if (reservation.hasParkingLot()) {
+                        // Comprobamos que no sea el mismo vehículo de otra reserva (ej: cuando se realiza la reserva con 5 clientes en butacas y tienen un vehículo)
+                        if (!voyage.alreadyParked(reservation.getIdVehicle())) {
+                            // Embarca el vehículo en el parking
+                            StackArrayImpl<Reservation> parkingLots = voyage.getParkingLots();
+                            parkingLots.push(reservation);
+                        }
+                    }
+                }
             }
         }
 
@@ -231,30 +293,22 @@ public class ShippingLineImpl implements ShippingLine {
         if (voyage == null)
             throw new VoyageNotFoundException();
 
-        // El viaje ha terminado, por lo tanto, contamos que los clientes han realizado el viaje
-        Iterator<Reservation> iterator = voyage.getReservations().values();
-        while (iterator.hasNext()) {
-            Reservation reservation = iterator.next();
-            Iterator<Client> clientsIterator = reservation.clients();
-            while (clientsIterator.hasNext()) {
-                // Actualizamos el vector ordenado de clientes más viajeros
-                mostTravelerClients.update(clientsIterator.next());
-            }
-        }
-
-        StackArrayImpl<Reservation> vehicleReservationsStackArray = voyage.getVehicleReservations();
+        StackArrayImpl<Reservation> parkingLotsStackArray = voyage.getParkingLots();
+        int numParkingLots = parkingLotsStackArray.size();
         // Creamos el array para crear el iterador que se devolverá
-        Reservation[] unloadVehicleReservationsArray = new Reservation[vehicleReservationsStackArray.size()];
+        Reservation[] unloadVehicleReservationsArray = new Reservation[parkingLotsStackArray.size()];
 
         int i=0;
-        while (!vehicleReservationsStackArray.isEmpty()) {
-            // Vamos borrando de la pila los vehiculos y los añadimos al array
-            Reservation reservation = vehicleReservationsStackArray.pop();
-            unloadVehicleReservationsArray[i] = reservation;
+        while (!parkingLotsStackArray.isEmpty()) {
+            // Vamos borrando de la pila los vehiculos y los añadimos al array, para que el desembarque sea en orden LIFO (Last In First Out)
+            Reservation reservation = parkingLotsStackArray.pop();
+            int unloadTime = voyage.getShip().getUnLoadTimeInMinutes() * (i + 1);
+            ParkingReservation parkingReservation = new ParkingReservation(reservation, unloadTime);
+            unloadVehicleReservationsArray[i] = parkingReservation;
             i++;
         }
 
-        return new IteratorArrayImpl<>(unloadVehicleReservationsArray, vehicleReservationsStackArray.size(), 0);
+        return new IteratorArrayImpl<>(unloadVehicleReservationsArray, numParkingLots, 0);
     }
 
     // TODO: Se tiene que implementar?
