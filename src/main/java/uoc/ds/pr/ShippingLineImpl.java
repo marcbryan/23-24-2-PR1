@@ -24,7 +24,6 @@ public class ShippingLineImpl implements ShippingLine {
     private OrderedVector<Client> mostTravelerClients;
     private OrderedVector<Route> mostTraveledRoute;
 
-    // TODO: Implementar constructor
     public ShippingLineImpl() {
         ships = new DSArray<>(MAX_NUM_SHIPS);
         routes = new DSArray<>(MAX_NUM_ROUTES);
@@ -45,7 +44,6 @@ public class ShippingLineImpl implements ShippingLine {
         });
     }
 
-    // TODO: Implementar métodos y excepciones
     @Override
     public void addShip(String id, String name, int nArmChairs, int nCabins2, int nCabins4, int nParkingSlots, int unLoadTimeInMinutes) {
         Ship ship = new Ship(id, name, nArmChairs, nCabins2, nCabins4, nParkingSlots, unLoadTimeInMinutes);
@@ -303,15 +301,19 @@ public class ShippingLineImpl implements ShippingLine {
             // Vamos borrando de la pila los vehiculos y los añadimos al array, para que el desembarque sea en orden LIFO (Last In First Out)
             Reservation reservation = parkingLotsStackArray.pop();
             int unloadTime = voyage.getShip().getUnLoadTimeInMinutes() * (i + 1);
+
             ParkingReservation parkingReservation = new ParkingReservation(reservation, unloadTime);
             unloadVehicleReservationsArray[i] = parkingReservation;
+
+            // Añadimos el vehículo que ya ha desembarcado
+            voyage.addUnloadedVehicle(parkingReservation);
+
             i++;
         }
 
         return new IteratorArrayImpl<>(unloadVehicleReservationsArray, numParkingLots, 0);
     }
 
-    // TODO: Se tiene que implementar?
     @Override
     public int unloadTime(String idVehicle, String idVoyage) throws LandingNotDoneException, VoyageNotFoundException, VehicleNotFoundException {
         Voyage voyage = getVoyage(idVoyage);
@@ -319,7 +321,17 @@ public class ShippingLineImpl implements ShippingLine {
         if (voyage == null)
             throw new VoyageNotFoundException();
 
-        return 0;
+        // Comprobamos si se ha realizado el desembarque
+        if (!voyage.haveUnloaded())
+            throw new LandingNotDoneException();
+
+        ParkingReservation vehicle = (ParkingReservation) voyage.getUnloadedVehicle(idVehicle);
+
+        // Si no se encuentra el vehículo, lanzamos la excepción
+        if (vehicle == null)
+            throw new VehicleNotFoundException();
+
+        return vehicle.getUnLoadTimeInMinutes();
     }
 
     @Override

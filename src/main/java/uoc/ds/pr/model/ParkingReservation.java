@@ -1,6 +1,5 @@
 package uoc.ds.pr.model;
 
-// TODO: Revisar esta clase, posiblemente se deba extender de otra superclase
 public class ParkingReservation extends Reservation {
     private int unLoadTimeInMinutes;
 

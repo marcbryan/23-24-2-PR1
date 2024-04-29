@@ -54,7 +54,7 @@ public class OrderedVector<E> implements FiniteContainer<E> {
     public void lshift(int i) {
         // Desplaza todos los elementos una posición a la izquierda
         int pos = i;
-        while (pos < length) {
+        while (pos < length-1) {
             elements[pos] = elements[pos+1];
             pos++;
         }
@@ -101,8 +101,10 @@ public class OrderedVector<E> implements FiniteContainer<E> {
         boolean found = false;
 
         // Buscamos el elemento que queremos borrar
-        while (!found && i < length)
-            found = (compare(elem, elements[i++]));
+        while (!found && i < length) {
+            found = (compare(elem, elements[i]));
+            i++;
+        }
 
         // Si lo encontramos, desplazamos a la izquierda los elementos
         if (found) {

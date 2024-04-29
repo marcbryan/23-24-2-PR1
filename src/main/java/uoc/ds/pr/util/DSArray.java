@@ -19,7 +19,6 @@ public class DSArray<K, V> implements Dictionary<K, V>, FiniteContainer<V> {
 
     @Override
     public void put(K key, V value) {
-        // TODO: Revisar excepcion
         if (isFull()) throw new FullContainerException();
         int i;
         for (i = 0; i < n && !dictionary[i].getKey().equals(key); i++) ;

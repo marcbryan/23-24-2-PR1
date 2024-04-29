@@ -19,6 +19,8 @@ public class Voyage {
     private FiniteLinkedList<Reservation> cabin4Reservations;
     private StackArrayImpl<Reservation> vehicleReservations;
     private StackArrayImpl<Reservation> parkingLots;
+    // Aquí se guardan los vehículos que ya han desembarcado
+    private StackArrayImpl<Reservation> unloadedVehicles;
 
     public Voyage(String id, Date departureDt, Date arrivalDt, Ship ship, Route route) {
         this.id = id;
@@ -35,6 +37,7 @@ public class Voyage {
         cabin4Reservations = new FiniteLinkedList<>(ship.getnCabins4());
         vehicleReservations = new StackArrayImpl<>(ship.getnParkingSlots());
         parkingLots = new StackArrayImpl<>(ship.getnParkingSlots());
+        unloadedVehicles = new StackArrayImpl<>(ship.getnParkingSlots());
     }
 
     public String getId() {
@@ -130,5 +133,25 @@ public class Voyage {
         }
 
         return false;
+    }
+
+    public void addUnloadedVehicle(Reservation vehicle) {
+        unloadedVehicles.push(vehicle);
+    }
+
+    public Reservation getUnloadedVehicle(String idVehicle) {
+        Iterator<Reservation> iterator = unloadedVehicles.values();
+        while (iterator.hasNext()) {
+            Reservation vehicle = iterator.next();
+            if (vehicle.getIdVehicle().equals(idVehicle))
+                return vehicle;
+        }
+
+        // Si no se encuentra devolvemos null
+        return null;
+    }
+
+    public boolean haveUnloaded() {
+        return (vehicleReservations.size() == unloadedVehicles.size());
     }
 }
