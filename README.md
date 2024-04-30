@@ -98,11 +98,19 @@ DSArrayTest prueba algunos métodos de la estructura de datos DSArray.
 
 En la raíz del proyecto adjunto imágenes con el resultado de los tests. Se han ejecutado correctamente los 12 tests de ShippingLinePR1Test, los tests que ya habían en el proyecto y los nuevos tests.
 
+Ejecución tests ShippingLinePR1Test:
+
 ![Captura1.png](Captura1.png)
 
-Porcentajes de cobertura antes de crear los nuevos tests.
+Porcentajes de cobertura **antes** de crear los nuevos tests:
 
 ![Captura2.png](Captura2.png)
+
+Porcentajes de cobertura **después** de crear los nuevos tests:
+
+![Captura4.png](Captura4.png)
+
+Ejecución de **todos** los tests del proyecto:
 
 ![Captura3.png](Captura3.png)
 
